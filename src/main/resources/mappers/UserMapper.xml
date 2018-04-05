@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dnnt.touch.mapper.UserMapper">
+
+    <insert id="insertUser">
+        insert into user(userName,phone,password) values (#{user.userName},#{user.phone},#{user.password})
+    </insert>
+
+    <select id="selectByName" resultType="com.dnnt.touch.domain.User">
+        select * from user where userName = #{name}
+    </select>
+
+    <select id="selectByPhone" resultType="com.dnnt.touch.domain.User">
+        select * from user where phone = #{phone}
+    </select>
+
+</mapper>

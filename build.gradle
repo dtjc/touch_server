@@ -1,0 +1,70 @@
+plugins{
+    id 'java'
+    id 'war'
+    id 'com.google.protobuf' version '0.8.5'
+    id 'idea'
+}
+
+group = 'com.dnnt'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext{
+    springVersion = "5.0.3.RELEASE"
+    protoDir = 'src/main/java/com/dnnt/touch/protobuf'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile "org.springframework:spring-context:$springVersion"
+    compile "org.springframework:spring-web:$springVersion"
+    compile "org.springframework:spring-webmvc:$springVersion"
+    compile "org.springframework:spring-tx:$springVersion"
+    compile "org.springframework:spring-jdbc:$springVersion"
+    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.4'
+    compile 'org.mybatis:mybatis:3.4.6'
+    compile 'org.mybatis:mybatis-spring:1.3.0'
+    compile 'mysql:mysql-connector-java:5.1.46'
+    compile 'com.mchange:c3p0:0.9.5.2'
+    compile 'com.auth0:java-jwt:3.3.0'
+    compile 'com.google.protobuf:protobuf-java:3.5.1'
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+    testCompile 'junit:junit:3.8.1'
+}
+
+sourceSets{
+    main {
+        proto {
+            srcDir protoDir
+            include '*.proto'
+        }
+    }
+}
+
+protobuf{
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.5.1'
+    }
+    generatedFilesBaseDir = 'src'
+}
+
+idea{
+    module{
+        inheritOutputDirs = false
+        outputDir = compileJava.destinationDir
+        testOutputDir = compileTestJava.destinationDir
+    }
+}
+
+task cleanProto(type: Delete){
+    delete fileTree("$projectDir/$protoDir"){
+        include "*.java"
+    }
+}
+

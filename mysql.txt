@@ -1,0 +1,7 @@
+
+create database touch;
+use touch;
+create table user(id int auto_increment primary key,
+userName varchar(16) not null unique,phone char(11) not null unique,
+password char(32),
+headUrl varchar(32) default "user/head/default.png");

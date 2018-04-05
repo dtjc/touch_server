@@ -1,0 +1,14 @@
+package com.dnnt.touch.mapper;
+
+import com.dnnt.touch.domain.User;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserMapper {
+    //此处的password是经过MD5散列的，不是原始的密码
+    void insertUser(@Param("user") User user);
+    User selectByName(@Param("name") String userName);
+    User selectByPhone(@Param("phone") String phone);
+}
