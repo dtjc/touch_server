@@ -1,7 +1,9 @@
 
 create database touch;
 use touch;
-create table user(id int auto_increment primary key,
+create table user(id int unsigned auto_increment primary key,
 userName varchar(16) not null unique,phone char(11) not null unique,
 password char(32),
-headUrl varchar(32) default "user/head/default.png");
+headUrl varchar(32) default "/user/head/default.png");
+
+insert into user(userName,phone,password) values("dtjc","18255132583","E10ADC3949BA59ABBE56E057F20F883E");

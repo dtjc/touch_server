@@ -19,14 +19,14 @@ public final class ChatProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>int32 from = 1;</code>
+     * <code>int64 from = 1;</code>
      */
-    int getFrom();
+    long getFrom();
 
     /**
-     * <code>int32 to = 2;</code>
+     * <code>int64 to = 2;</code>
      */
-    int getTo();
+    long getTo();
 
     /**
      * <code>int64 time = 3;</code>
@@ -42,6 +42,16 @@ public final class ChatProto {
      */
     com.google.protobuf.ByteString
         getMsgBytes();
+
+    /**
+     * <code>int32 type = 5;</code>
+     */
+    int getType();
+
+    /**
+     * <code>int32 seq = 6;</code>
+     */
+    int getSeq();
   }
   /**
    * Protobuf type {@code com.dnnt.touch.protobuf.ChatMsg}
@@ -56,10 +66,12 @@ public final class ChatProto {
       super(builder);
     }
     private ChatMsg() {
-      from_ = 0;
-      to_ = 0;
+      from_ = 0L;
+      to_ = 0L;
       time_ = 0L;
       msg_ = "";
+      type_ = 0;
+      seq_ = 0;
     }
 
     @java.lang.Override
@@ -95,12 +107,12 @@ public final class ChatProto {
             }
             case 8: {
 
-              from_ = input.readInt32();
+              from_ = input.readInt64();
               break;
             }
             case 16: {
 
-              to_ = input.readInt32();
+              to_ = input.readInt64();
               break;
             }
             case 24: {
@@ -112,6 +124,16 @@ public final class ChatProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               msg_ = s;
+              break;
+            }
+            case 40: {
+
+              type_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              seq_ = input.readInt32();
               break;
             }
           }
@@ -139,20 +161,20 @@ public final class ChatProto {
     }
 
     public static final int FROM_FIELD_NUMBER = 1;
-    private int from_;
+    private long from_;
     /**
-     * <code>int32 from = 1;</code>
+     * <code>int64 from = 1;</code>
      */
-    public int getFrom() {
+    public long getFrom() {
       return from_;
     }
 
     public static final int TO_FIELD_NUMBER = 2;
-    private int to_;
+    private long to_;
     /**
-     * <code>int32 to = 2;</code>
+     * <code>int64 to = 2;</code>
      */
-    public int getTo() {
+    public long getTo() {
       return to_;
     }
 
@@ -199,6 +221,24 @@ public final class ChatProto {
       }
     }
 
+    public static final int TYPE_FIELD_NUMBER = 5;
+    private int type_;
+    /**
+     * <code>int32 type = 5;</code>
+     */
+    public int getType() {
+      return type_;
+    }
+
+    public static final int SEQ_FIELD_NUMBER = 6;
+    private int seq_;
+    /**
+     * <code>int32 seq = 6;</code>
+     */
+    public int getSeq() {
+      return seq_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -211,17 +251,23 @@ public final class ChatProto {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (from_ != 0) {
-        output.writeInt32(1, from_);
+      if (from_ != 0L) {
+        output.writeInt64(1, from_);
       }
-      if (to_ != 0) {
-        output.writeInt32(2, to_);
+      if (to_ != 0L) {
+        output.writeInt64(2, to_);
       }
       if (time_ != 0L) {
         output.writeInt64(3, time_);
       }
       if (!getMsgBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, msg_);
+      }
+      if (type_ != 0) {
+        output.writeInt32(5, type_);
+      }
+      if (seq_ != 0) {
+        output.writeInt32(6, seq_);
       }
       unknownFields.writeTo(output);
     }
@@ -231,13 +277,13 @@ public final class ChatProto {
       if (size != -1) return size;
 
       size = 0;
-      if (from_ != 0) {
+      if (from_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, from_);
+          .computeInt64Size(1, from_);
       }
-      if (to_ != 0) {
+      if (to_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, to_);
+          .computeInt64Size(2, to_);
       }
       if (time_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -245,6 +291,14 @@ public final class ChatProto {
       }
       if (!getMsgBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, msg_);
+      }
+      if (type_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, type_);
+      }
+      if (seq_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, seq_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -270,6 +324,10 @@ public final class ChatProto {
           == other.getTime());
       result = result && getMsg()
           .equals(other.getMsg());
+      result = result && (getType()
+          == other.getType());
+      result = result && (getSeq()
+          == other.getSeq());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -282,14 +340,20 @@ public final class ChatProto {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FROM_FIELD_NUMBER;
-      hash = (53 * hash) + getFrom();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getFrom());
       hash = (37 * hash) + TO_FIELD_NUMBER;
-      hash = (53 * hash) + getTo();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTo());
       hash = (37 * hash) + TIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTime());
       hash = (37 * hash) + MSG_FIELD_NUMBER;
       hash = (53 * hash) + getMsg().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getType();
+      hash = (37 * hash) + SEQ_FIELD_NUMBER;
+      hash = (53 * hash) + getSeq();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -419,13 +483,17 @@ public final class ChatProto {
       }
       public Builder clear() {
         super.clear();
-        from_ = 0;
+        from_ = 0L;
 
-        to_ = 0;
+        to_ = 0L;
 
         time_ = 0L;
 
         msg_ = "";
+
+        type_ = 0;
+
+        seq_ = 0;
 
         return this;
       }
@@ -453,6 +521,8 @@ public final class ChatProto {
         result.to_ = to_;
         result.time_ = time_;
         result.msg_ = msg_;
+        result.type_ = type_;
+        result.seq_ = seq_;
         onBuilt();
         return result;
       }
@@ -494,10 +564,10 @@ public final class ChatProto {
 
       public Builder mergeFrom(com.dnnt.touch.protobuf.ChatProto.ChatMsg other) {
         if (other == com.dnnt.touch.protobuf.ChatProto.ChatMsg.getDefaultInstance()) return this;
-        if (other.getFrom() != 0) {
+        if (other.getFrom() != 0L) {
           setFrom(other.getFrom());
         }
-        if (other.getTo() != 0) {
+        if (other.getTo() != 0L) {
           setTo(other.getTo());
         }
         if (other.getTime() != 0L) {
@@ -506,6 +576,12 @@ public final class ChatProto {
         if (!other.getMsg().isEmpty()) {
           msg_ = other.msg_;
           onChanged();
+        }
+        if (other.getType() != 0) {
+          setType(other.getType());
+        }
+        if (other.getSeq() != 0) {
+          setSeq(other.getSeq());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -534,54 +610,54 @@ public final class ChatProto {
         return this;
       }
 
-      private int from_ ;
+      private long from_ ;
       /**
-       * <code>int32 from = 1;</code>
+       * <code>int64 from = 1;</code>
        */
-      public int getFrom() {
+      public long getFrom() {
         return from_;
       }
       /**
-       * <code>int32 from = 1;</code>
+       * <code>int64 from = 1;</code>
        */
-      public Builder setFrom(int value) {
+      public Builder setFrom(long value) {
         
         from_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 from = 1;</code>
+       * <code>int64 from = 1;</code>
        */
       public Builder clearFrom() {
         
-        from_ = 0;
+        from_ = 0L;
         onChanged();
         return this;
       }
 
-      private int to_ ;
+      private long to_ ;
       /**
-       * <code>int32 to = 2;</code>
+       * <code>int64 to = 2;</code>
        */
-      public int getTo() {
+      public long getTo() {
         return to_;
       }
       /**
-       * <code>int32 to = 2;</code>
+       * <code>int64 to = 2;</code>
        */
-      public Builder setTo(int value) {
+      public Builder setTo(long value) {
         
         to_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 to = 2;</code>
+       * <code>int64 to = 2;</code>
        */
       public Builder clearTo() {
         
-        to_ = 0;
+        to_ = 0L;
         onChanged();
         return this;
       }
@@ -680,6 +756,58 @@ public final class ChatProto {
         onChanged();
         return this;
       }
+
+      private int type_ ;
+      /**
+       * <code>int32 type = 5;</code>
+       */
+      public int getType() {
+        return type_;
+      }
+      /**
+       * <code>int32 type = 5;</code>
+       */
+      public Builder setType(int value) {
+        
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 type = 5;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int seq_ ;
+      /**
+       * <code>int32 seq = 6;</code>
+       */
+      public int getSeq() {
+        return seq_;
+      }
+      /**
+       * <code>int32 seq = 6;</code>
+       */
+      public Builder setSeq(int value) {
+        
+        seq_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 seq = 6;</code>
+       */
+      public Builder clearSeq() {
+        
+        seq_ = 0;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFieldsProto3(unknownFields);
@@ -744,8 +872,9 @@ public final class ChatProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\017ChatProto.proto\022\027com.dnnt.touch.protob" +
-      "uf\">\n\007ChatMsg\022\014\n\004from\030\001 \001(\005\022\n\n\002to\030\002 \001(\005\022" +
-      "\014\n\004time\030\003 \001(\003\022\013\n\003msg\030\004 \001(\tb\006proto3"
+      "uf\"Y\n\007ChatMsg\022\014\n\004from\030\001 \001(\003\022\n\n\002to\030\002 \001(\003\022" +
+      "\014\n\004time\030\003 \001(\003\022\013\n\003msg\030\004 \001(\t\022\014\n\004type\030\005 \001(\005" +
+      "\022\013\n\003seq\030\006 \001(\005b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -764,7 +893,7 @@ public final class ChatProto {
     internal_static_com_dnnt_touch_protobuf_ChatMsg_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_dnnt_touch_protobuf_ChatMsg_descriptor,
-        new java.lang.String[] { "From", "To", "Time", "Msg", });
+        new java.lang.String[] { "From", "To", "Time", "Msg", "Type", "Seq", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
