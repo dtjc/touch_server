@@ -2,6 +2,7 @@ package com.dnnt.touch.netty;
 
 
 import com.dnnt.touch.protobuf.ChatProto;
+import com.dnnt.touch.util.Constant;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -37,7 +38,7 @@ public class NettyStartUp implements InitializingBean {
                                 pl.addLast(new ProtobufDecoder(ChatProto.ChatMsg.getDefaultInstance()));
                                 pl.addLast(new ProtobufVarint32LengthFieldPrepender());
                                 pl.addLast(new ProtobufEncoder());
-                                pl.addLast(new MsgHandler());
+                                pl.addLast(Constant.MSG_HANDLER,new MsgHandler());
                             }
                         }).childOption(ChannelOption.SO_KEEPALIVE,true);
                 ChannelFuture cf = serverBootstrap.bind(PORT).sync();

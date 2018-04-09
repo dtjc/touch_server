@@ -35,13 +35,19 @@ public class UserController extends BaseController{
 
     @RequestMapping("/login")
     public Json<User> login(String nameOrPhone , String password) {
+        if (nameOrPhone.length() < 4 || nameOrPhone.length() > 16){
+            return generateFailure("用户名/手机错误!");
+        }
         //查找用户是否存在
-        User user = userMapper.selectByName(nameOrPhone);
-        if (user == null){
+        User user;
+        if (nameOrPhone.matches("\\d.*")){
             user = userMapper.selectByPhone(nameOrPhone);
-            if (user == null){
-                return generateFailure("用户名/手机错误");
-            }
+        }else {
+            user = userMapper.selectByName(nameOrPhone);
+        }
+
+        if (user == null){
+            return generateFailure("用户名/手机错误");
         }
 
         Json<User> data;
@@ -73,6 +79,9 @@ public class UserController extends BaseController{
         }
         if (userName.length() < 4 || userName.length() > 16){
             return generateFailure("用户名至少为4位，最多为16位");
+        }
+        if (userName.matches("\\d.*")){
+            return generateFailure("用户名不得以数字开头!");
         }
         if (password.length() < 6){
             return generateFailure("密码至少为6位");
