@@ -11,17 +11,15 @@ public class User {
     private String userName;
     private String password;
     private String phone;
-    private String token;
     private String headUrl;
 
     public User(){}
 
-    public User(long id, String userName, String phone, String password, String token, String headUrl) {
+    public User(long id, String userName, String phone, String password, String headUrl) {
         this.id = id;
         this.userName = userName;
         this.phone = phone;
         this.password = password;
-        this.token = token;
         this.headUrl = headUrl;
     }
 
@@ -55,14 +53,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getHeadUrl() {

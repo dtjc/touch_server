@@ -27,11 +27,14 @@ public class UserController extends BaseController{
     private static final String TOKEN_KEY = "!r,,zGLkX7T^Rs60+tQYssiThTRFn@IZ(|NUy599aD[f>R`=DK.rM@X[VJOgiho";
     private Algorithm hmacSHA = Algorithm.HMAC256(TOKEN_KEY);
 
-    @Autowired
     private UserMapper userMapper;
 
-    public UserController() throws UnsupportedEncodingException {
+    @Autowired
+    public UserController(UserMapper userMapper) throws UnsupportedEncodingException {
+        this.userMapper = userMapper;
     }
+
+    public UserController() throws UnsupportedEncodingException {}
 
     @RequestMapping("/login")
     public Json<User> login(String nameOrPhone , String password) {
@@ -62,8 +65,8 @@ public class UserController extends BaseController{
                     .withClaim(User.ID,user.getId())
                     .withClaim(User.HEAD_URL,user.getHeadUrl())
                     .sign(hmacSHA);
-            user.setToken(token);
             data = generateSuccessful(user);
+            data.setMsg(token);
         }else {
             data = generateFailure("用户名或密码错误!");
         }
@@ -145,4 +148,12 @@ public class UserController extends BaseController{
     public Json<Void> test(){
         return generateSuccessful(null);
     }
+
+//    @RequestMapping("/throw")
+//    public Json<Void> throwT(){
+//        User k = null;
+//        System.out.println(k.getHeadUrl());
+//        throw new RuntimeException("");
+////        return null;
+//    }
 }

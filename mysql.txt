@@ -1,9 +1,16 @@
 
 create database touch;
 use touch;
-create table user(id int unsigned auto_increment primary key,
-userName varchar(16) not null unique,phone char(11) not null unique,
+create table user(id bigint auto_increment primary key,
+userName varchar(16) not null unique,
+phone char(11) not null unique,
 password char(32),
 headUrl varchar(32) default "/user/head/default.png");
 
-insert into user(userName,phone,password) values("dtjc","18255132583","E10ADC3949BA59ABBE56E057F20F883E");
+create table friends(userId bigint,friendId bigint);
+
+create table msg(fromId bigint,toId bigint,msg text,time bigint,type int);
+
+insert into user(userName,phone,password) values("dtjc1","18255132581","E10ADC3949BA59ABBE56E057F20F883E");
+insert into user(userName,phone,password) values("dtjc2","18255132582","E10ADC3949BA59ABBE56E057F20F883E");
+insert into user(userName,phone,password) values("dtjc3","18255132583","E10ADC3949BA59ABBE56E057F20F883E");

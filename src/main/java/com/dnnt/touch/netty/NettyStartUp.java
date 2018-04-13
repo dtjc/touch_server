@@ -1,6 +1,8 @@
 package com.dnnt.touch.netty;
 
 
+import com.dnnt.touch.mapper.MsgMapper;
+import com.dnnt.touch.mapper.UserMapper;
 import com.dnnt.touch.protobuf.ChatProto;
 import com.dnnt.touch.util.Constant;
 import io.netty.bootstrap.ServerBootstrap;
@@ -16,11 +18,22 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NettyStartUp implements InitializingBean {
     public static final int PORT = 9999;
+
+    private UserMapper userMapper;
+    private MsgMapper msgMapper;
+
+    @Autowired
+    public NettyStartUp(UserMapper userMapper,MsgMapper msgMapper){
+        this.userMapper = userMapper;
+        this.msgMapper = msgMapper;
+    }
+
     @Override
     public void afterPropertiesSet(){
         new Thread(() -> {
@@ -38,7 +51,7 @@ public class NettyStartUp implements InitializingBean {
                                 pl.addLast(new ProtobufDecoder(ChatProto.ChatMsg.getDefaultInstance()));
                                 pl.addLast(new ProtobufVarint32LengthFieldPrepender());
                                 pl.addLast(new ProtobufEncoder());
-                                pl.addLast(Constant.MSG_HANDLER,new MsgHandler());
+                                pl.addLast(Constant.MSG_HANDLER,new MsgHandler(userMapper,msgMapper));
                             }
                         }).childOption(ChannelOption.SO_KEEPALIVE,true);
                 ChannelFuture cf = serverBootstrap.bind(PORT).sync();

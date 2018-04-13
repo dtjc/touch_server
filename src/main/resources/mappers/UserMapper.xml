@@ -16,4 +16,19 @@
         select * from user where phone = #{phone}
     </select>
 
+    <select id="selectById" resultType="com.dnnt.touch.domain.User">
+        select * from user where id = #{id}
+    </select>
+
+    <insert id="insertFriend">
+        insert into friends(userId,friendId) values (#{userId},#{friendId})
+    </insert>
+
+    <select id="getUserFriends" resultType="java.lang.Long">
+        select friendId from friends where userId = #{id}
+        union
+        select userId from friends where friendId = #{id}
+    </select>
+
+
 </mapper>

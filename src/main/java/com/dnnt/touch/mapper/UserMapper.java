@@ -5,10 +5,15 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserMapper {
     //此处的password是经过MD5散列的，不是原始的密码
     void insertUser(@Param("user") User user);
     User selectByName(@Param("name") String userName);
     User selectByPhone(@Param("phone") String phone);
+    User selectById(@Param("id") long id);
+    void insertFriend(@Param("userId") long userId,@Param("friendId") long friendId);
+    List<Long> getUserFriends(@Param("id") long id);
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dnnt.touch.mapper.MsgMapper">
+    <insert id="insertMsg">
+        insert into msg values (#{msg.fromId},#{msg.toId},#{msg.msg},#{msg.time},#{msg.type})
+    </insert>
+
+    <select id="getMsg" resultType="com.dnnt.touch.domain.IMMsg">
+        select * from msg where toId = #{id}
+    </select>
+
+    <delete id="deleteMsg">
+        delete from msg where toId = #{id}
+    </delete>
+
+    <select id="selectAddFriendMsg" resultType="com.dnnt.touch.domain.IMMsg">
+        select * from msg where fromId = #{fromId} and toId = #{toId} and type = #{type}
+    </select>
+</mapper>
