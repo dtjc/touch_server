@@ -17,6 +17,7 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,7 @@ public class NettyStartUp implements InitializingBean {
                                 pl.addLast(new ProtobufDecoder(ChatProto.ChatMsg.getDefaultInstance()));
                                 pl.addLast(new ProtobufVarint32LengthFieldPrepender());
                                 pl.addLast(new ProtobufEncoder());
+                                pl.addLast(new IdleStateHandler(6,0,0));
                                 pl.addLast(Constant.MSG_HANDLER,new MsgHandler(userMapper,msgMapper));
                             }
                         }).childOption(ChannelOption.SO_KEEPALIVE,true);

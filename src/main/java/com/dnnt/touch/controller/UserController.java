@@ -16,9 +16,7 @@ import com.dnnt.touch.domain.User;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user")
@@ -142,6 +140,26 @@ public class UserController extends BaseController{
             data = generateFailure("验证码错误");
         }
         return data;
+    }
+
+    @RequestMapping("/getFriends")
+    public Json<List<User>> getFriends(String token){
+//        JWT.require(hmacSHA)
+        try {
+            DecodedJWT decodedJWT = JWT.require(hmacSHA).build().verify(token);
+            long id = decodedJWT.getClaim(User.ID).asLong();
+            List<Long> friendsId = userMapper.getUserFriends(id);
+            List<User> users = new ArrayList<>();
+            for (long fid : friendsId){
+                User u = userMapper.selectById(fid);
+                u.setPassword("");
+                u.setPhone("");
+                users.add(u);
+            }
+            return generateSuccessful(users);
+        }catch (Exception e){
+            return generateFailure("unknown error");
+        }
     }
 
     @RequestMapping("/test")

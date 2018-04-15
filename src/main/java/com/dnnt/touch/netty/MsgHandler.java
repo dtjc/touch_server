@@ -6,9 +6,9 @@ import com.dnnt.touch.mapper.MsgMapper;
 import com.dnnt.touch.mapper.UserMapper;
 import com.dnnt.touch.protobuf.ChatProto;
 import com.dnnt.touch.util.Constant;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -29,6 +29,8 @@ public class MsgHandler extends ChannelDuplexHandler {
     private List<Long> friendsId = new ArrayList<>();
 
     private long userId;
+
+    private int count = 0;
 
 
     public MsgHandler(UserMapper userMapper,MsgMapper msgMapper){
@@ -99,7 +101,7 @@ public class MsgHandler extends ChannelDuplexHandler {
         friendsId.add(chatMsg.getTo());
         ChannelHandlerContext toCtx = ctxMap.get(chatMsg.getTo());
         if (toCtx != null){
-            toCtx.executor().submit(() -> {
+            toCtx.executor().execute(() -> {
                 List<Long> friends = ((MsgHandler)toCtx.pipeline().get(Constant.MSG_HANDLER)).friendsId;
                 friends.add(chatMsg.getFrom());
             });
@@ -174,10 +176,10 @@ public class MsgHandler extends ChannelDuplexHandler {
     private void sendMsg(ChannelHandlerContext toCtx, ChatProto.ChatMsg chatMsg){
         if (toCtx != null){
             //将消息发送给接收者，在接收者的EventLoop中操作,将msg存到接收者handler的msgList中
-            toCtx.executor().submit(() -> {
+            toCtx.executor().execute(() -> {
                 List<ChatProto.ChatMsg> toList = ((MsgHandler)toCtx.pipeline().get(Constant.MSG_HANDLER)).msgList;
                 toList.add(chatMsg);
-                toCtx.executor().submit(() -> toCtx.writeAndFlush(chatMsg));
+                toCtx.executor().execute(() -> toCtx.writeAndFlush(chatMsg));
             });
 
             //定时器，接收者无ACK返回或超时返回时，将msg存到数据库并从msgList中移除
@@ -206,7 +208,7 @@ public class MsgHandler extends ChannelDuplexHandler {
         //接收者返回ACK，则将msg从接收者的handler的msgList中移除，在接收者的EventLoop中操作
         ChannelHandlerContext toCtx = ctxMap.get(chatMsg.getTo());
         if (toCtx != null){
-            toCtx.executor().submit(() -> removeReceivedMsg(chatMsg,toCtx));
+            toCtx.executor().execute(() -> removeReceivedMsg(chatMsg,toCtx));
         }
     }
 
@@ -221,6 +223,22 @@ public class MsgHandler extends ChannelDuplexHandler {
                 toList.remove(i);
                 break;
             }
+        }
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent){
+            System.out.println("idle");
+            System.out.println(((IdleStateEvent) evt).isFirst());
+            IdleStateEvent event = (IdleStateEvent)evt;
+            if (event.state() == IdleState.READER_IDLE && !event.isFirst()){
+                ctxMap.remove(userId);
+                ctx.close();
+                System.out.println("overtime remove");
+            }
+        }else {
+            super.userEventTriggered(ctx,evt);
         }
     }
 }
