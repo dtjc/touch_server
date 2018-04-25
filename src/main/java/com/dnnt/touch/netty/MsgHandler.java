@@ -1,5 +1,8 @@
 package com.dnnt.touch.netty;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.dnnt.touch.domain.IMMsg;
 import com.dnnt.touch.domain.User;
 import com.dnnt.touch.mapper.MsgMapper;
@@ -29,8 +32,6 @@ public class MsgHandler extends ChannelDuplexHandler {
     private List<Long> friendsId = new ArrayList<>();
 
     private long userId;
-
-    private int count = 0;
 
 
     public MsgHandler(UserMapper userMapper,MsgMapper msgMapper){
@@ -72,21 +73,34 @@ public class MsgHandler extends ChannelDuplexHandler {
     }
 
     private void handleConnected(ChannelHandlerContext ctx, ChatProto.ChatMsg chatMsg){
-        userId = chatMsg.getFrom();
-        friendsId = userMapper.getUserFriends(userId);
-        ctxMap.put(userId,ctx);
-        List<IMMsg> imMsgs = msgMapper.getMsg(userId);
-        for (IMMsg msg: imMsgs) {
-            ctx.write(ChatProto.ChatMsg.newBuilder()
-                    .setFrom(msg.getFromId())
-                    .setTo(msg.getToId())
-                    .setMsg(msg.getMsg())
-                    .setTime(msg.getTime())
-                    .setType(msg.getType())
-                    .build());
+        try {
+            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
+                    .build()
+                    .verify(chatMsg.getMsg());
+            long id = decodedJWT.getClaim(User.ID).asLong();
+            if (id == chatMsg.getFrom()){
+                userId = id;
+                ctxMap.put(userId,ctx);
+                friendsId = userMapper.getUserFriends(userId);
+                List<IMMsg> imMsgs = msgMapper.getMsg(userId);
+                for (IMMsg msg: imMsgs) {
+                    ctx.write(ChatProto.ChatMsg.newBuilder()
+                            .setFrom(msg.getFromId())
+                            .setTo(msg.getToId())
+                            .setMsg(msg.getMsg())
+                            .setTime(msg.getTime())
+                            .setType(msg.getType())
+                            .build());
+                }
+                ctx.flush();
+                msgMapper.deleteMsg(chatMsg.getFrom());
+            }else {
+                ctx.close();
+            }
+        }catch (Exception e){
+            ctx.close();
         }
-        ctx.flush();
-        msgMapper.deleteMsg(chatMsg.getFrom());
+
     }
 
     @Override

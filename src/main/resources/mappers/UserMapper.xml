@@ -30,5 +30,11 @@
         select userId from friends where friendId = #{id}
     </select>
 
+    <update id="updatePassword">
+        update user set password = #{password} where phone = #{phone}
+    </update>
 
+    <update id="updateHeadUrl">
+        update user set headUrl = #{headUrl} where id = #{id}
+    </update>
 </mapper>

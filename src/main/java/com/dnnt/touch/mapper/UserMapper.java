@@ -16,4 +16,6 @@ public interface UserMapper {
     User selectById(@Param("id") long id);
     void insertFriend(@Param("userId") long userId,@Param("friendId") long friendId);
     List<Long> getUserFriends(@Param("id") long id);
+    void updatePassword(@Param("phone") String phone,@Param("password") String password);
+    void updateHeadUrl(@Param("id") long id, @Param("headUrl") String headUrl);
 }

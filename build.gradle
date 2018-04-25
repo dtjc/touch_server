@@ -1,9 +1,25 @@
-plugins{
-    id 'java'
-    id 'war'
-    id 'com.google.protobuf' version '0.8.5'
-    id 'idea'
+buildscript {
+    ext.kotlin_version = '1.2.31'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.5'
+    }
+    ext{
+        springVersion = "5.0.3.RELEASE"
+        protoDir = 'src/main/java/com/dnnt/touch/protobuf'
+    }
 }
+
+
+apply plugin: 'kotlin'
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'com.google.protobuf'
+apply plugin: 'idea'
+
 
 group = 'com.dnnt'
 version = '1.0-SNAPSHOT'
@@ -11,19 +27,14 @@ version = '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-ext{
-    springVersion = "5.0.3.RELEASE"
-    protoDir = 'src/main/java/com/dnnt/touch/protobuf'
-}
-
 repositories {
     mavenCentral()
 }
-
 dependencies {
     testCompile 'junit:junit:4.12'
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.springframework:spring-context:$springVersion"
     compile "org.springframework:spring-web:$springVersion"
     compile "org.springframework:spring-webmvc:$springVersion"
@@ -37,6 +48,8 @@ dependencies {
     compile 'com.auth0:java-jwt:3.3.0'
     compile 'com.google.protobuf:protobuf-java:3.5.1'
     compile 'io.netty:netty-all:4.1.22.Final'
+    compile 'commons-io:commons-io:2.4'
+    compile 'commons-fileupload:commons-fileupload:1.3.1'
 }
 
 sourceSets{
@@ -66,6 +79,18 @@ idea{
 task cleanProto(type: Delete){
     delete fileTree("$projectDir/$protoDir"){
         include "*.java"
+    }
+}
+
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
