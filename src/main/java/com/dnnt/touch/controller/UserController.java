@@ -229,8 +229,8 @@ public class UserController extends BaseController{
         }
         String path = Constant.MAPPING_HEAD_DIR + String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         userMapper.updateHeadUrl(id,path);
-        List<Long> friedsId = userMapper.getUserFriends(id);
-        for (long fid : friedsId){
+        List<Long> friendsId = userMapper.getUserFriends(id);
+        for (long fid : friendsId){
             msgMapper.insertMsg(new IMMsg(id,fid,path,now,Constant.TYPE_HEAD_UPDATE));
         }
         return generateSuccessful(path);
