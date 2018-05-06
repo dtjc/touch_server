@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface UserMapper {
@@ -15,7 +16,8 @@ public interface UserMapper {
     User selectByPhone(@Param("phone") String phone);
     User selectById(@Param("id") long id);
     void insertFriend(@Param("userId") long userId,@Param("friendId") long friendId);
-    List<Long> getUserFriends(@Param("id") long id);
+    Set<Long> getUserFriends(@Param("id") long id);
     void updatePassword(@Param("phone") String phone,@Param("password") String password);
     void updateHeadUrl(@Param("id") long id, @Param("headUrl") String headUrl);
+    Set<Long> findUserFriends(@Param("id") long id);
 }

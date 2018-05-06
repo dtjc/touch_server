@@ -37,4 +37,10 @@
     <update id="updateHeadUrl">
         update user set headUrl = #{headUrl} where id = #{id}
     </update>
+
+    <select id="findUserFriends" resultType="java.lang.Long">
+        select friendId from friends where userId = #{id}
+        union
+        select userId from friends where friendId = #{id}
+    </select>
 </mapper>

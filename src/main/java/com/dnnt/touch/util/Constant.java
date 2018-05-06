@@ -16,7 +16,8 @@ public class Constant {
     public static final int TYPE_FRIEND_AGREE = 0x10;
     public static final int TYPE_USER_NOT_EXIST=0x20;
     public static final int TYPE_USER_ALREADY_ADD=0x40;
-    public static final int TYPE_HEAD_UPDATE = 0X80;
+    public static final int TYPE_HEAD_UPDATE = 0x80;
+    public static final int TYPE_SEND_FAIL = 0x100;
     public static final char SPLIT_CHAR = ';';
 
     public static final int CODE_TAG_REGISTER = 1;

@@ -2,17 +2,14 @@ package com.dnnt.touch.util
 
 import java.io.File
 import java.io.FileInputStream
-import java.math.BigInteger
+import java.io.FileNotFoundException
 import java.security.*
-import java.security.cert.CertificateFactory
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 
 fun getMD5Hex(bytes: ByteArray): String {
     val digest = MessageDigest.getInstance("MD5")
@@ -83,8 +80,12 @@ fun genSecretKey(hex: String): SecretKey {
 fun getSSLContext(): SSLContext{
     val password = "123456"
     val keyStore = KeyStore.getInstance("jks")
-    val file = File("../conf/tomcat.jks")
-    val fis = FileInputStream(file)
+
+    var jksFile = File("../conf/tomcat.jks")
+    if (!jksFile.exists()){
+        jksFile = File("/opt/tomcat9/conf/tomcat.jks")
+    }
+    val fis = FileInputStream(jksFile)
     keyStore.load(fis,password.toCharArray())
     fis.close()
     val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())

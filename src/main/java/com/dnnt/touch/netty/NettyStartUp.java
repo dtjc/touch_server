@@ -54,7 +54,7 @@ public class NettyStartUp implements InitializingBean {
                         .channel(NioServerSocketChannel.class)
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
-                            protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            protected void initChannel(SocketChannel socketChannel){
                                 ChannelPipeline pl = socketChannel.pipeline();
                                 SSLEngine sslEngine = sslContext.createSSLEngine();
                                 sslEngine.setUseClientMode(false);

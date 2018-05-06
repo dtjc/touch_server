@@ -13,10 +13,7 @@ import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -29,9 +26,9 @@ public class MsgHandler extends ChannelDuplexHandler {
 
     private List<ChatProto.ChatMsg> msgList = new LinkedList<>();
 
-    private List<Long> friendsId = new ArrayList<>();
+    private Set<Long> friendsId;
 
-    private long userId;
+    private long userId = 0;
 
 
     public MsgHandler(UserMapper userMapper,MsgMapper msgMapper){
@@ -104,6 +101,16 @@ public class MsgHandler extends ChannelDuplexHandler {
     }
 
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        ctx.executor().schedule(() -> {
+            if (userId == 0){
+                ctx.close();
+            }
+        },6,TimeUnit.SECONDS);
+    }
+
+    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("MsgHandler : inactive");
         ctxMap.remove(userId);
@@ -116,11 +123,11 @@ public class MsgHandler extends ChannelDuplexHandler {
         ChannelHandlerContext toCtx = ctxMap.get(chatMsg.getTo());
         if (toCtx != null){
             toCtx.executor().execute(() -> {
-                List<Long> friends = ((MsgHandler)toCtx.pipeline().get(Constant.MSG_HANDLER)).friendsId;
+                Set<Long> friends = ((MsgHandler)toCtx.pipeline().get(Constant.MSG_HANDLER)).friendsId;
                 friends.add(chatMsg.getFrom());
             });
         }
-        handleMsg(ctx,chatMsg);
+        handleChatMsg(ctx,chatMsg);
     }
 
     private void handleAddFriend(ChannelHandlerContext ctx, ChatProto.ChatMsg chatMsg){
@@ -138,19 +145,18 @@ public class MsgHandler extends ChannelDuplexHandler {
                     .setSeq(chatMsg.getSeq())
                     .build());
         }else {
-            for (long item:friendsId) {
-                if (item == user.getId()){
-                    ctx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
-                            .setType(Constant.TYPE_USER_ALREADY_ADD)
-                            .setSeq(chatMsg.getSeq())
-                            .build());
-                    return;
-                }
+            if (friendsId.contains(user.getId())){
+                ctx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
+                        .setType(Constant.TYPE_USER_ALREADY_ADD)
+                        .setSeq(chatMsg.getSeq())
+                        .build());
+                return;
             }
             User fromUser = userMapper.selectById(chatMsg.getFrom());
             if (user.getId() == fromUser.getId()){
                 return;
             }
+            //查看好申请是否已在IMMsg中
             IMMsg imMsg = msgMapper.selectAddFriendMsg(chatMsg.getFrom(),user.getId(),Constant.TYPE_ADD_FRIEND);
             if (imMsg != null){
                 return;
@@ -161,11 +167,22 @@ public class MsgHandler extends ChannelDuplexHandler {
                     .setTo(user.getId())
                     .build();
 
-            handleMsg(ctx,chatMsg);
+            handleChatMsg(ctx,chatMsg);
         }
     }
 
     private void handleMsg(ChannelHandlerContext ctx, ChatProto.ChatMsg chatMsg){
+        if (friendsId.contains(chatMsg.getTo())){
+            handleChatMsg(ctx,chatMsg);
+        }else {
+            sendACK(ctx,chatMsg);
+            ctx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
+                    .setSeq(chatMsg.getSeq())
+                    .setType(Constant.TYPE_SEND_FAIL));
+        }
+    }
+
+    private void handleChatMsg(ChannelHandlerContext ctx, ChatProto.ChatMsg chatMsg){
         //设置消息时间,客户端无法保证时间的正确性
         chatMsg = chatMsg
                 .toBuilder()

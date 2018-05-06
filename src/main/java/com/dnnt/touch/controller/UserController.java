@@ -37,12 +37,12 @@ public class UserController extends BaseController{
     private MsgMapper msgMapper;
 
     @Autowired
-    public UserController(UserMapper userMapper, MsgMapper msgMapper) throws UnsupportedEncodingException {
+    public UserController(UserMapper userMapper, MsgMapper msgMapper){
         this.userMapper = userMapper;
         this.msgMapper = msgMapper;
     }
 
-    public UserController() throws UnsupportedEncodingException {}
+    public UserController(){}
 
     @RequestMapping("/login")
     public Json<User> login(String nameOrPhone , String password) {
@@ -64,12 +64,9 @@ public class UserController extends BaseController{
         Json<User> data;
         String md5Pwd = SecureUtilKt.getMD5Hex(password.getBytes());
         if (md5Pwd.equals(user.getPassword())){
-            user.setPassword("");
-            //生成并设置token,一星期后过期
             String token = null;
             try {
                 token = JWT.create()
-    //                    .withExpiresAt(new Date(System.currentTimeMillis() + 7*24*60*60*1000))
                         .withClaim(User.USER_NAME,user.getUserName())
                         .withClaim(User.PHONE,user.getPhone())
                         .withClaim(User.ID,user.getId())
@@ -77,6 +74,7 @@ public class UserController extends BaseController{
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            user.setPassword("");
             data = generateSuccessful(user);
             data.setMsg(token);
         }else {
@@ -98,8 +96,8 @@ public class UserController extends BaseController{
         if (userName.matches("\\d.*")){
             return generateFailure("用户名不得以数字开头!");
         }
-        if (password.length() < 6){
-            return generateFailure("密码至少为6位");
+        if (password.length() < 6 || password.length() > 16){
+            return generateFailure("密码小于6位或大于16位");
         }
 
         Json<Void> data;
@@ -162,13 +160,12 @@ public class UserController extends BaseController{
 
     @RequestMapping("/getFriends")
     public Json<List<User>> getFriends(String token){
-//        JWT.require(hmacSHA)
         try {
             DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
                     .build()
                     .verify(token);
             long id = decodedJWT.getClaim(User.ID).asLong();
-            List<Long> friendsId = userMapper.getUserFriends(id);
+            Set<Long> friendsId = userMapper.getUserFriends(id);
             List<User> users = new ArrayList<>();
             for (long fid : friendsId){
                 User u = userMapper.selectById(fid);
@@ -229,7 +226,7 @@ public class UserController extends BaseController{
         }
         String path = Constant.MAPPING_HEAD_DIR + String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         userMapper.updateHeadUrl(id,path);
-        List<Long> friendsId = userMapper.getUserFriends(id);
+        Set<Long> friendsId = userMapper.getUserFriends(id);
         for (long fid : friendsId){
             msgMapper.insertMsg(new IMMsg(id,fid,path,now,Constant.TYPE_HEAD_UPDATE));
         }
@@ -242,8 +239,39 @@ public class UserController extends BaseController{
         return dirPath + "/" + imageName;
     }
 
+    @RequestMapping("/changePassword")
+    public Json<Void> changePassword(Long id,String oldPassword, String newPassword){
+        if (oldPassword.length() < 6 || oldPassword.length() > 16){
+            return generateFailure("密码错误");
+        }
+        if (newPassword.length() < 6 || newPassword.length() > 16){
+            return generateFailure("密码小于6位或大于16位");
+        }
+        String oldMD5Pwd = SecureUtilKt.getMD5Hex(oldPassword.getBytes());
+        User user = userMapper.selectById(id);
+        if (oldMD5Pwd.equals(user.getPassword())){
+            String newMD5Pwd = SecureUtilKt.getMD5Hex(newPassword.getBytes());
+            userMapper.updatePassword(user.getPhone(),newMD5Pwd);
+            return generateSuccessful(null);
+        }else {
+            return generateFailure("密码错误");
+        }
+    }
+
     @RequestMapping("/test")
-    public Json<Void> test(){
+    public Json<Void> test(String token){
+        System.out.println("test: " + token);
+        DecodedJWT decodedJWT = null;
+//        System.out.println(decodedJWT.getClaim(User.ID).asLong());
+//        System.out.println(decodedJWT.getExpiresAt().getTime());
+        try {
+            decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
+                    .build()
+                    .verify(token);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return generateFailure("wrong token");
+        }
         return generateSuccessful(null);
     }
 }
