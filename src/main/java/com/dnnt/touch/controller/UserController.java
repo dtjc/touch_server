@@ -200,12 +200,12 @@ public class UserController extends BaseController{
                     .verify(token);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            return generateFailure("wrong token");
+            return generateFailure("上传头像失败,wrong token");
         }
         long id = decodedJWT.getClaim(User.ID).asLong();
         User user = userMapper.selectById(id);
         String headUrl = user.getHeadUrl();
-        File oldFile = null;
+        File oldFile;
         int num = 0;
         if (!headUrl.endsWith("default.png")){
             int i = headUrl.lastIndexOf('_') + 1;
@@ -215,14 +215,14 @@ public class UserController extends BaseController{
             num++;
         }
         File head = new File(getHeadPath(request,id,num));
-        OutputStream os = null;
+        OutputStream fos;
         try {
             head.createNewFile();
-            os = new FileOutputStream(head);
-            IOUtils.copy(file.getInputStream(),os);
+            fos = new FileOutputStream(head);
+            IOUtils.copy(file.getInputStream(),fos);
         } catch (Exception e) {
             e.printStackTrace();
-            return generateFailure("");
+            return generateFailure("上传头像失败");
         }
         String path = Constant.MAPPING_HEAD_DIR + String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         userMapper.updateHeadUrl(id,path);

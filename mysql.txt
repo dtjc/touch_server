@@ -1,4 +1,6 @@
 
+drop database touch;
+
 create database touch;
 use touch;
 create table user(id bigint auto_increment primary key,

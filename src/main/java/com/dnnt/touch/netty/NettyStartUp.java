@@ -45,6 +45,7 @@ public class NettyStartUp implements InitializingBean {
     @Override
     public void afterPropertiesSet(){
         sslContext = SecureUtilKt.getSSLContext();
+
         new Thread(() -> {
             NioEventLoopGroup bossGroup = new NioEventLoopGroup();
             NioEventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -76,7 +77,5 @@ public class NettyStartUp implements InitializingBean {
                 workerGroup.shutdownGracefully();
             }
         }).start();
-
-
     }
 }

@@ -82,6 +82,7 @@ fun getSSLContext(): SSLContext{
     val keyStore = KeyStore.getInstance("jks")
 
     var jksFile = File("../conf/tomcat.jks")
+    //用于测试
     if (!jksFile.exists()){
         jksFile = File("/opt/tomcat9/conf/tomcat.jks")
     }
