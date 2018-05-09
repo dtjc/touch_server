@@ -42,6 +42,9 @@
 
     <mvc:resources mapping="/user/head/**" location="/image/head/"/>
 
+    <!--自定义异常处理机制-->
+    <bean class="com.dnnt.touch.util.ExceptionResolver"/>
+
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="com.dnnt.touch.mapper" />
     </bean>

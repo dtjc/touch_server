@@ -24,6 +24,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -191,7 +193,7 @@ public class UserController extends BaseController{
     }
 
     @RequestMapping("updateHead")
-    public Json<String> updateHead(@RequestParam("file") MultipartFile file,@RequestParam("token") String token, HttpServletRequest request){
+    public Json<String> updateHead(MultipartFile file,String token, HttpServletRequest request){
         DecodedJWT decodedJWT = null;
         long now = System.currentTimeMillis();
         try {
@@ -215,14 +217,11 @@ public class UserController extends BaseController{
             num++;
         }
         File head = new File(getHeadPath(request,id,num));
-        OutputStream fos;
-        try {
-            head.createNewFile();
-            fos = new FileOutputStream(head);
-            IOUtils.copy(file.getInputStream(),fos);
-        } catch (Exception e) {
+        try(OutputStream os = new FileOutputStream(head);
+            InputStream is = file.getInputStream()){
+            IOUtils.copy(is,os);
+        } catch (IOException e) {
             e.printStackTrace();
-            return generateFailure("上传头像失败");
         }
         String path = Constant.MAPPING_HEAD_DIR + String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         userMapper.updateHeadUrl(id,path);
@@ -258,20 +257,25 @@ public class UserController extends BaseController{
         }
     }
 
-    @RequestMapping("/test")
-    public Json<Void> test(String token){
-        System.out.println("test: " + token);
-        DecodedJWT decodedJWT = null;
-//        System.out.println(decodedJWT.getClaim(User.ID).asLong());
-//        System.out.println(decodedJWT.getExpiresAt().getTime());
-        try {
-            decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
-                    .build()
-                    .verify(token);
-        } catch (UnsupportedEncodingException e) {
+    @RequestMapping("uploadErrFile")
+    public Json<Void> uploadErrFile(MultipartFile uploadFile, HttpServletRequest request){
+        String dirPath = request.getServletContext().getRealPath("/app_err/");
+        new File(dirPath).mkdir();
+        File file = new File(dirPath + "/"  + uploadFile.getOriginalFilename());
+        try(OutputStream os = new FileOutputStream(file);
+            InputStream is = uploadFile.getInputStream()){
+            IOUtils.copy(is,os);
+            return generateSuccessful(null);
+        } catch (IOException e) {
             e.printStackTrace();
-            return generateFailure("wrong token");
         }
-        return generateSuccessful(null);
+        return generateFailure("");
+    }
+
+
+
+    @RequestMapping("/test")
+    public Json<Void> test(){
+        throw new RuntimeException();
     }
 }
