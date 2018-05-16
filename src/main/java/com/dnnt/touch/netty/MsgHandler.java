@@ -248,9 +248,7 @@ public class MsgHandler extends ChannelDuplexHandler {
         for (int i = 0; i < toList.size(); i++) {
             ChatProto.ChatMsg temp = toList.get(i);
             //除type以外都相等
-            if (temp.getSeq() == msg.getSeq() && temp.getTime() == msg.getTime()
-                    && temp.getFrom() == msg.getFrom() && temp.getTo() == msg.getTo()
-                    && temp.getMsg().equals(msg.getMsg())){
+            if (temp.getFrom() == msg.getFrom() && temp.getTo() == msg.getTo() && temp.getSeq() == msg.getSeq()){
                 toList.remove(i);
                 break;
             }

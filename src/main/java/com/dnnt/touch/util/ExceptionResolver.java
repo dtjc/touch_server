@@ -14,6 +14,7 @@ public class ExceptionResolver extends SimpleMappingExceptionResolver {
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         logger.error(ex.getMessage(),ex);
-        return null;
+        return super.doResolveException(request,response,handler,ex);
     }
 }
+
