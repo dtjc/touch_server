@@ -9,6 +9,7 @@ import com.dnnt.touch.mapper.MsgMapper;
 import com.dnnt.touch.mapper.UserMapper;
 import com.dnnt.touch.protobuf.ChatProto;
 import com.dnnt.touch.util.Constant;
+import com.dnnt.touch.util.SecureUtilKt;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -71,10 +72,12 @@ public class MsgHandler extends ChannelDuplexHandler {
 
     private void handleConnected(ChannelHandlerContext ctx, ChatProto.ChatMsg chatMsg){
         try {
-            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
-                    .build()
-                    .verify(chatMsg.getMsg());
-            long id = decodedJWT.getClaim(User.ID).asLong();
+            User user = SecureUtilKt.verifyToken(chatMsg.getMsg(),userMapper);
+            if (user == null){
+                ctx.close();
+                return;
+            }
+            long id = user.getId();
             if (id == chatMsg.getFrom()){
                 userId = id;
                 ctxMap.put(userId,ctx);

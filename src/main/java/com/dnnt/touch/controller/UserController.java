@@ -69,10 +69,8 @@ public class UserController extends BaseController{
             String token = null;
             try {
                 token = JWT.create()
-                        .withClaim(User.USER_NAME,user.getUserName())
-                        .withClaim(User.PHONE,user.getPhone())
                         .withClaim(User.ID,user.getId())
-                        .sign(Algorithm.HMAC256(Constant.TOKEN_KEY));
+                        .sign(Algorithm.HMAC256(Constant.TOKEN_KEY+user.getPassword()));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -162,23 +160,21 @@ public class UserController extends BaseController{
 
     @RequestMapping("/getFriends")
     public Json<List<User>> getFriends(String token){
-        try {
-            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
-                    .build()
-                    .verify(token);
-            long id = decodedJWT.getClaim(User.ID).asLong();
-            Set<Long> friendsId = userMapper.getUserFriends(id);
-            List<User> users = new ArrayList<>();
-            for (long fid : friendsId){
-                User u = userMapper.selectById(fid);
-                u.setPassword("");
-                u.setPhone("");
-                users.add(u);
-            }
-            return generateSuccessful(users);
-        }catch (Exception e){
-            return generateFailure("unknown error");
+
+        User user = SecureUtilKt.verifyToken(token,userMapper);
+        if (user == null){
+            return generateFailure("wrong token");
         }
+        long id = user.getId();
+        Set<Long> friendsId = userMapper.getUserFriends(id);
+        List<User> users = new ArrayList<>();
+        for (long fid : friendsId){
+            User u = userMapper.selectById(fid);
+            u.setPassword("");
+            u.setPhone("");
+            users.add(u);
+        }
+        return generateSuccessful(users);
     }
 
     @RequestMapping("/resetPassword")
@@ -194,19 +190,13 @@ public class UserController extends BaseController{
 
     @RequestMapping("updateHead")
     public Json<String> updateHead(MultipartFile file,String token, HttpServletRequest request){
-        DecodedJWT decodedJWT = null;
         long now = System.currentTimeMillis();
-        try {
-            decodedJWT = JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY))
-                    .build()
-                    .verify(token);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        User user = SecureUtilKt.verifyToken(token,userMapper);
+        if (user == null){
             return generateFailure("上传头像失败,wrong token");
         }
-        long id = decodedJWT.getClaim(User.ID).asLong();
-        User user = userMapper.selectById(id);
         String headUrl = user.getHeadUrl();
+        long id = user.getId();
         File oldFile;
         int num = 0;
         if (!headUrl.endsWith("default.png")){
@@ -275,7 +265,9 @@ public class UserController extends BaseController{
 
 
     @RequestMapping("/test")
-    public Json<Void> test(){
-        throw new RuntimeException();
+    public Json<Long> test(String token){
+
+        long id = JWT.decode(token).getClaim(User.ID).asLong();
+        return generateSuccessful(id);
     }
 }

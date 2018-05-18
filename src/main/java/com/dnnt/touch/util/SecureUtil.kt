@@ -1,8 +1,13 @@
 package com.dnnt.touch.util
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import com.dnnt.touch.domain.User
+import com.dnnt.touch.mapper.UserMapper
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
+import java.io.UnsupportedEncodingException
 import java.security.*
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
@@ -95,4 +100,18 @@ fun getSSLContext(): SSLContext{
     val sslContext = SSLContext.getInstance("TLS")
     sslContext.init(kms,null,null)
     return sslContext
+}
+
+fun verifyToken(token: String,userMapper: UserMapper): User? {
+    val id = JWT.decode(token).getClaim(User.ID).asLong()!!
+    val user = userMapper.selectById(id)
+    try {
+        JWT.require(Algorithm.HMAC256(Constant.TOKEN_KEY + user.password))
+                .build()
+                .verify(token)
+        return user
+    } catch (e: UnsupportedEncodingException) {
+        e.printStackTrace()
+    }
+    return null
 }
