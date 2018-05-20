@@ -74,12 +74,20 @@ public class MsgHandler extends ChannelDuplexHandler {
         try {
             User user = SecureUtilKt.verifyToken(chatMsg.getMsg(),userMapper);
             if (user == null){
+                ctx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
+                        .setType(Constant.TYPE_TOKEN_WRONG));
                 ctx.close();
                 return;
             }
             long id = user.getId();
             if (id == chatMsg.getFrom()){
                 userId = id;
+                ChannelHandlerContext lastCtx = ctxMap.get(userId);
+                if (lastCtx != null){
+                    lastCtx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
+                            .setType(Constant.TYPE_OTHER_LOGIN));
+                    lastCtx.close();
+                }
                 ctxMap.put(userId,ctx);
                 friendsId = userMapper.getUserFriends(userId);
                 List<IMMsg> imMsgs = msgMapper.getMsg(userId);

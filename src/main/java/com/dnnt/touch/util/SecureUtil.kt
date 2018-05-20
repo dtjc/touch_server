@@ -2,6 +2,7 @@ package com.dnnt.touch.util
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.JWTVerificationException
 import com.dnnt.touch.domain.User
 import com.dnnt.touch.mapper.UserMapper
 import java.io.File
@@ -110,7 +111,7 @@ fun verifyToken(token: String,userMapper: UserMapper): User? {
                 .build()
                 .verify(token)
         return user
-    } catch (e: UnsupportedEncodingException) {
+    } catch (e: Exception) {
         e.printStackTrace()
     }
     return null

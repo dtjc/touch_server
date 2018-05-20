@@ -18,6 +18,8 @@ public class Constant {
     public static final int TYPE_USER_ALREADY_ADD=0x40;
     public static final int TYPE_HEAD_UPDATE = 0x80;
     public static final int TYPE_SEND_FAIL = 0x100;
+    public static final int TYPE_TOKEN_WRONG = 0x200;
+    public static final int TYPE_OTHER_LOGIN = 0x800;
     public static final char SPLIT_CHAR = ';';
 
     public static final int CODE_TAG_REGISTER = 1;

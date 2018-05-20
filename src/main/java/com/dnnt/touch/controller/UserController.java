@@ -266,7 +266,6 @@ public class UserController extends BaseController{
 
     @RequestMapping("/test")
     public Json<Long> test(String token){
-
         long id = JWT.decode(token).getClaim(User.ID).asLong();
         return generateSuccessful(id);
     }
