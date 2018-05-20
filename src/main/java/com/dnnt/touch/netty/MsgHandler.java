@@ -23,11 +23,11 @@ public class MsgHandler extends ChannelDuplexHandler {
     private UserMapper userMapper;
     private MsgMapper msgMapper;
 
-    private static Map<Long,ChannelHandlerContext> ctxMap = new ConcurrentHashMap<>();
+    public static Map<Long,ChannelHandlerContext> ctxMap = new ConcurrentHashMap<>();
 
     private List<ChatProto.ChatMsg> msgList = new LinkedList<>();
 
-    private Set<Long> friendsId;
+    public Set<Long> friendsId;
 
     private long userId = 0;
 
@@ -76,7 +76,6 @@ public class MsgHandler extends ChannelDuplexHandler {
             if (user == null){
                 ctx.writeAndFlush(ChatProto.ChatMsg.newBuilder()
                         .setType(Constant.TYPE_TOKEN_WRONG));
-                ctx.close();
                 return;
             }
             long id = user.getId();
@@ -215,7 +214,7 @@ public class MsgHandler extends ChannelDuplexHandler {
                 .build());
     }
 
-    private void sendMsg(ChannelHandlerContext toCtx, ChatProto.ChatMsg chatMsg){
+    public void sendMsg(ChannelHandlerContext toCtx, ChatProto.ChatMsg chatMsg){
         if (toCtx != null){
             //将消息发送给接收者，在接收者的EventLoop中操作,将msg存到接收者handler的msgList中
             toCtx.executor().execute(() -> {
@@ -281,4 +280,5 @@ public class MsgHandler extends ChannelDuplexHandler {
             super.userEventTriggered(ctx,evt);
         }
     }
+
 }

@@ -9,9 +9,12 @@ import com.dnnt.touch.domain.IMMsg;
 import com.dnnt.touch.domain.Json;
 import com.dnnt.touch.mapper.MsgMapper;
 import com.dnnt.touch.mapper.UserMapper;
+import com.dnnt.touch.netty.MsgHandler;
+import com.dnnt.touch.protobuf.ChatProto;
 import com.dnnt.touch.util.Constant;
 import com.dnnt.touch.util.SecureUtilKt;
 import com.dnnt.touch.util.SessionUtil;
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,17 +218,65 @@ public class UserController extends BaseController{
         }
         String path = Constant.MAPPING_HEAD_DIR + String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         userMapper.updateHeadUrl(id,path);
-        Set<Long> friendsId = userMapper.getUserFriends(id);
-        for (long fid : friendsId){
-            msgMapper.insertMsg(new IMMsg(id,fid,path,now,Constant.TYPE_HEAD_UPDATE));
-        }
+
+        notifyFriends(id,path,now,Constant.TYPE_HEAD_UPDATE);
+
         return generateSuccessful(path);
+    }
+
+    private void notifyFriends(long id, String msg, long time, int type){
+        Set<Long> friendsId;
+        ChannelHandlerContext ctx = MsgHandler.ctxMap.get(id);
+        if (ctx != null){
+            MsgHandler msgHandler = (MsgHandler)ctx.pipeline().get(Constant.MSG_HANDLER);
+            friendsId = msgHandler.friendsId;
+        }else {
+            friendsId = userMapper.getUserFriends(id);
+        }
+        for (long fid : friendsId){
+            ChannelHandlerContext toCtx = MsgHandler.ctxMap.get(fid);
+            if (toCtx != null){
+                toCtx.executor().execute(() -> {
+                    MsgHandler msgHandler = (MsgHandler)toCtx.pipeline().get(Constant.MSG_HANDLER);
+                    msgHandler.sendMsg(toCtx,ChatProto.ChatMsg.newBuilder()
+                            .setFrom(id)
+                            .setTo(fid)
+                            .setMsg(msg)
+                            .setTime(time)
+                            .setType(type)
+                            .build());
+                });
+
+            }else {
+                msgMapper.insertMsg(new IMMsg(id,fid,msg,time,type));
+            }
+        }
     }
 
     private String getHeadPath(HttpServletRequest request, long id,int num){
         String dirPath = request.getServletContext().getRealPath(Constant.REAL_HEAD_DIR);
         String imageName = String.valueOf(id) + "_" + String.valueOf(num) + ".png";
         return dirPath + "/" + imageName;
+    }
+
+    @RequestMapping("/updateUserName")
+    public Json<Void> updateUserName(String newName, String token){
+        if (newName.length() < 4 || newName.length() > 16){
+            return generateFailure("用户名至少为4位，最多为16位");
+        }
+        User user = SecureUtilKt.verifyToken(token,userMapper);
+        if (user == null){
+            return generateFailure("修改用户名失败,wrong token");
+        }
+        if (userMapper.selectByName(newName) != null){
+            return generateFailure("该用户名已被使用！");
+        }
+        userMapper.updateUserName(user.getId(),newName);
+
+        notifyFriends(user.getId(),newName,System.currentTimeMillis(),Constant.TYPE_UPDATE_USER_NAME);
+
+        return generateSuccessful(null);
+
     }
 
     @RequestMapping("/changePassword")

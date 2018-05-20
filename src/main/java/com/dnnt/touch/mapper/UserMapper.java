@@ -20,4 +20,5 @@ public interface UserMapper {
     void updatePassword(@Param("phone") String phone,@Param("password") String password);
     void updateHeadUrl(@Param("id") long id, @Param("headUrl") String headUrl);
     Set<Long> findUserFriends(@Param("id") long id);
+    void updateUserName(@Param("id") long id, @Param("newName") String newName);
 }

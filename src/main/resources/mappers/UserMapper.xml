@@ -43,4 +43,8 @@
         union
         select userId from friends where friendId = #{id}
     </select>
+
+    <update id="updateUserName">
+        update user set userName = #{newName} where id = #{id}
+    </update>
 </mapper>
