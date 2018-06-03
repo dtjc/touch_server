@@ -12,6 +12,7 @@ import com.dnnt.touch.mapper.UserMapper;
 import com.dnnt.touch.netty.MsgHandler;
 import com.dnnt.touch.protobuf.ChatProto;
 import com.dnnt.touch.util.Constant;
+import com.dnnt.touch.util.MsgApi;
 import com.dnnt.touch.util.SecureUtilKt;
 import com.dnnt.touch.util.SessionUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -133,10 +134,15 @@ public class UserController extends BaseController{
             while (code.length() < 6){
                 code = "0" + code;
             }
-            //TODO 发送手机验证码
-            SessionUtil.setAttr(phone,code);
             System.out.println(phone + " : " + code);
-            data = generateSuccessful(null);
+            String msg = MsgApi.sentMsg("【物联网实验室】您的验证码是" + code,phone);
+            if (msg.isEmpty()){
+                SessionUtil.setAttr(phone,code);
+                data = generateSuccessful(null);
+            }else {
+                data = generateFailure(msg);
+            }
+
         }else if (codeTag == Constant.CODE_TAG_REGISTER){
             data = generateFailure("该手机号已注册");
         }else if (codeTag == Constant.CODE_TAG_RESET){
@@ -312,6 +318,8 @@ public class UserController extends BaseController{
         }
         return generateFailure("");
     }
+
+
 
 
 
