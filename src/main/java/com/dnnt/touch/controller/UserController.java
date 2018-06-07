@@ -94,8 +94,8 @@ public class UserController extends BaseController{
         if (code == null || !code.equals(verificationCode)){
             return generateFailure("非法注册!!!");
         }
-        if (userName.length() < 4 || userName.length() > 16){
-            return generateFailure("用户名至少为4位，最多为16位");
+        if (userName.isEmpty() || userName.length() > 16){
+            return generateFailure("用户名，不能为空，最多为16位");
         }
         if (userName.matches("\\d.*")){
             return generateFailure("用户名不得以数字开头!");
@@ -267,8 +267,8 @@ public class UserController extends BaseController{
 
     @RequestMapping("/updateUserName")
     public Json<Void> updateUserName(String newName, String token){
-        if (newName.length() < 4 || newName.length() > 16){
-            return generateFailure("用户名至少为4位，最多为16位");
+        if (newName.isEmpty() || newName.length() > 16){
+            return generateFailure("用户名，不能为空，最多为16位");
         }
         User user = SecureUtilKt.verifyToken(token,userMapper);
         if (user == null){

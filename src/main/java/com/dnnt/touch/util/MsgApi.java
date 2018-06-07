@@ -20,6 +20,7 @@ import java.util.Map;
 public class MsgApi {
     private static final String URl_SENT_MSG = "http://yunpian.com/v1/sms/send.json";
     private static final String ENCODING = "UTF-8";
+    private static final String apikey = "";    //apikey is sensitive, add your own apikey
 
     public static String sentMsg(String text, String mobile) {
         Map<String ,String> params = new HashMap<>();
